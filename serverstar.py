@@ -145,7 +145,7 @@ def receive():
         time = now.strftime("%H : %M : %S")
         print(f'{time} /Connected with {str(address)}')
 
-        co.send('%NICK%'.encode(encoding))
+        co.send('%USER%'.encode(encoding))
         username = co.recv(1024).decode(encoding)
         if username in banned_usernames:
             now = datetime.now()
