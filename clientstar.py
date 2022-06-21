@@ -1,18 +1,17 @@
-import socket
+# Importing necessary libraries
+import socket  
 import threading
 
-from datetime import datetime
+from datetime import datetime # Importing datetime to view timestamps
 
-ADDR = ('127.0.0.1', 15662)
-ENCODING = 'utf-8'
-
-now = datetime.now()
-time = now.strftime("%H : %M : %S")
+ADDR = ('127.0.0.1', 15662) #IP  and PORT tuple
+ENCODING = 'utf-8' # UTF-8 type encoding is followed here
 
 
+#this function handles the responses sent from the server to the client
 def handle_server_instruction(message):
-    # expected interaction
-    if message == '%NICK%':
+    
+    if message == '%USER%':
         co.send(username.encode(ENCODING))
     elif message == '%PASS%':
         passw = input('passw required: ')
@@ -41,9 +40,9 @@ def handle_server_instruction(message):
         time = now.strftime("%H : %M : %S")
         print(f'{time} /Received unknown instruction "{message}" from server')
 
-
+#This function receives the information transmitted from the server and passes to the handle_server_instruction function
 def receive():
-    """Pool messages from server (runs in separate thread)"""
+    
     while True:
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
@@ -63,16 +62,17 @@ def receive():
             co.close()
             break
 
-
+# this is the function from where we will write to the server
 def write():
-    """Hold open input for sending messages (runs in separate thread)"""
+    
     while True:
-        #now = datetime.now()
-        #time = now.strftime("%H : %M : %S")
+        now = datetime.now()
+        time = now.strftime("%H : %M : %S")
         message = f'{input("")}'
         co.send(message.encode(ENCODING))
 
 
+        #main function which gets called as soon as we initiate the client file
 if __name__ == '__main__':
     try:
         username = input("Enter your username: ")
