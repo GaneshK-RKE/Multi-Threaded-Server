@@ -62,7 +62,7 @@ def handle_command(user, message):
     cmd: str = message.strip()
     cmd_name = cmd.split(' ', 1)[0]
     if cmd_name == '$admin':
-        send_to(user, '%passww%')
+        send_to(user, '%PASS%')
         passww = receive_from(user)
         if passww == '12345':
             user.is_admin = True
