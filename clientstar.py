@@ -1,16 +1,17 @@
-#importing necessary libraries
+
+# Importing necessary libraries
 import socket
 import threading
 
-from datetime import datetime # this library provides us to have timestamps at our server
+from datetime import datetime
 
-ADDR = ('127.0.0.1', 15662) # address tuple consisting of IPV4 and port
-ENCODING = 'utf-8' # we are using utf-8 encoding here
+ADDR = ('127.0.0.1', 15662)# address tuple
+ENCODING = 'utf-8'# utf encoding
 
 now = datetime.now()
 time = now.strftime("%H : %M : %S")
 
-# this function handles the information which is recevived from the server
+# function to handle info from the server
 def handle_server_instruction(message):
     # expected interaction
     if message == '%USER%':
@@ -18,6 +19,7 @@ def handle_server_instruction(message):
     elif message == '%PASS%':
         passw = input('passw required: ')
         co.send(passw.encode(ENCODING))
+    # expected termination
     elif message == '%BANNED%':
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
@@ -28,7 +30,7 @@ def handle_server_instruction(message):
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
         print(f'{time} /This username is already taken, please reconnect with another one')
-        co.close() # this command terminates the connection and closes the socket
+        co.close()
         exit(1)
     elif message == '%QUIT%':
         now = datetime.now()
@@ -41,9 +43,9 @@ def handle_server_instruction(message):
         time = now.strftime("%H : %M : %S")
         print(f'{time} /Received unknown instruction "{message}" from server')
 
-# A function which helps us receive information from the server
+# a function to receive info from the srever which is later passed to handle _server function
 def receive():
-    # a while loop is initiated here to terminate for any errors
+    """Pool messages from server (runs in separate thread)"""
     while True:
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
@@ -63,13 +65,16 @@ def receive():
             co.close()
             break
 
-# A functio0n to write to the server
+# a function to write to the server
 def write():
+    """Hold open input for sending messages (runs in separate thread)"""
     while True:
+        #now = datetime.now()
+        #time = now.strftime("%H : %M : %S")
         message = f'{input("")}'
         co.send(message.encode(ENCODING))
 
-# Main function which gets initiated when we open this client file
+#main function
 if __name__ == '__main__':
     try:
         username = input("Enter your username: ")
@@ -82,8 +87,8 @@ if __name__ == '__main__':
         print(f'{time} /Could not connect to the server. Exiting...')
         exit(1)
 
-    receive_threat = threading.Thread(target=receive) # initiating the receive thread
+    receive_threat = threading.Thread(target=receive) # initiating receive thread
     receive_threat.start()
 
-    write_thread = threading.Thread(target=write) # initiating the write thread
+    write_thread = threading.Thread(target=write) # initiating write thread
     write_thread.start()
