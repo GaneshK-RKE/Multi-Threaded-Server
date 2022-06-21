@@ -7,7 +7,7 @@ open up the server code first and then open up as many as client models you want
 we have used a static IP in this project but the IPV4 can be fetched using the command
 ip_socket = socket.gethostbyname(socket.gethostname())
 
-
+## Dependencies and features
 The project consists of 2 files namely clientstar.py and serverstar.py
 
 Client file , when initiated , connects to the server using a separate thread. This holds true for multiple clients.
@@ -21,13 +21,13 @@ We have several features in this chatroom such as members and admins where the a
 The admin functions are protected by a password .
 
 
-Learnings :
+## Learnings :
 
 I learnt about the basic socket programming and multi threading in python.
 
 I also learnt about the basics of networking system and came across terms like Port, Socket , IP address ,Host etc.
 
-Resources used:
+## Resources used:
 
 https://realpython.com/python-sockets/
 https://www.tutorialspoint.com/python/python_multithreading.htm
