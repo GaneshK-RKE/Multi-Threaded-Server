@@ -1,3 +1,5 @@
+
+
 # Importing necessary libraries
 import threading
 import socket
@@ -5,9 +7,9 @@ import socket
 from datetime import datetime
 
 
-encoding = 'utf-8' # utf encoding
-decoding = 'utf-8' # utf encoding
-ADDR = ('127.0.0.1', 15662) # address tuple
+encoding = 'utf-8'# utf encoding
+decoding = 'utf-8'# utf decoding
+ADDR = ('127.0.0.1', 15662)# address tuple
 
 
 
@@ -61,6 +63,7 @@ def handle_command(user, message):
     print(f'{time} /Command by {user.username}: "{message}"')
     cmd: str = message.strip()
     cmd_name = cmd.split(' ', 1)[0]
+    # non-admin commands
     if cmd_name == '$admin':
         send_to(user, '%PASS%')
         passww = receive_from(user)
@@ -69,11 +72,10 @@ def handle_command(user, message):
             now = datetime.now()
             time = now.strftime("%H : %M : %S")
             print(f'{time} /  {user.username} is now an admin')
-            send_to(user, '---> Congrats! You are and Avenger now  :P')
-            #broadcast(f'-- User {user.username} is now an admin', [user], True)
+            send_to(user, '---> Congrats! You are and Avenger now ')
+            #broadcast(f'-- User {user.username} is now an admin', True)
         else:
             send_to(user, '-- Invalid credentials')
-            # non-admin commands
     elif cmd_name == '$quit' or cmd_name == '$exit':
         send_to(user, '%QUIT%')
         user.co.close()
@@ -110,6 +112,10 @@ def handle_command(user, message):
 
 #A function to handle the clients 
 def handle(user: User):
+    """
+    Handle each new input from user;
+    this method runs in a separate thread for each user
+    """
     while True:
         try:
             message = receive_from(user)
@@ -130,13 +136,16 @@ def handle(user: User):
 
 # function to receive from  the client
 def receive():
+    """
+    Main loop, add new clients to the chat room
+    """
     while True:
         co, address = server.accept()
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
         print(f'{time} /Connected with {str(address)}')
 
-        co.send('%USER%'.encode(encoding))
+        co.send('%NICK%'.encode(encoding))
         username = co.recv(1024).decode(encoding)
         if username in banned_usernames:
             now = datetime.now()
