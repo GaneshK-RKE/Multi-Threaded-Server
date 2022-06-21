@@ -70,7 +70,7 @@ def handle_command(user, message):
             time = now.strftime("%H : %M : %S")
             print(f'{time} /  {user.username} is now an admin')
             send_to(user, '---> Congrats! You are and Avenger now  :P')
-            broadcast(f'-- User {user.username} is now an admin', [user], True)
+            #broadcast(f'-- User {user.username} is now an admin', [user], True)
         else:
             send_to(user, '-- Invalid credentials')
             # non-admin commands
