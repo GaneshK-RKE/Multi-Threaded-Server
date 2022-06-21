@@ -1,43 +1,45 @@
+#importing necessary libraries
+
 import threading
 import socket
 
 from datetime import datetime
 
 
-encoding = 'utf-8'
-decoding = 'utf-8'
-ADDR = ('127.0.0.1', 15662)
-#AUTHORIZED_ADMIN_CREDENTIALS = ['admin:adminpassww', 'joe:secure']
+encoding = 'utf-8' #encoding which we follow here is utf-8
+decoding = 'utf-8' # same as encoding
+ADDR = ('127.0.0.1', 15662) #address tuple
 
 
 
+#initiating a class USER so that we fan use the values of client object (co in this case elsewhere)
 class User:
     def __init__(self, username: str, co: socket, admin_only=False):
         self.username = username
         self.co = co
         self.admin_only = admin_only
 
-
+# A function which will send the message to all the participants in the hosted sserver
 def broadcast(message: str, ignore_list=None, admin_only=False):
-    if ignore_list is None:
-        ignore_list = []
+   
     for user in users:
-        if user not in ignore_list:
-            if not admin_only or user.admin_only:
-                user.co.send(message.encode(encoding))
+        if not admin_only :
+            user.co.send(message.encode(encoding))
+        
+                
 
-
+# A function which sends the messages to the client
 def send_to(user: User, message: str):
     return user.co.send(message.encode(encoding))
 
-
+# A function to receive from the client
 def receive_from(user: User, size: int = 1024):
     return user.co.recv(size).decode(decoding)
 
-
+# Kicking users function
 def kick_user(username: str):
     try:
-        user_idx = list(map(lambda p: p.username, users)).index(username)
+        user_idx = list(map(lambda p: p.username, users)).index(username) # A lambda function is used for convinience
     except ValueError:
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
@@ -53,18 +55,19 @@ def kick_user(username: str):
     broadcast(f'{time} / {user_to_kick} was kicked by {username}')
     return True
 
-
+# A function which handles different commands from the client
 def handle_command(user, message):
     now = datetime.now()
     time = now.strftime("%H : %M : %S")
     print(f'{time} /Command by {user.username}: "{message}"')
     cmd: str = message.strip()
     cmd_name = cmd.split(' ', 1)[0]
-    # non-admin commands
-    if cmd_name == '$admin':
+    
+    
+    if cmd_name == '$admin': # A command to activate admin-only commands
         send_to(user, '%PASS%')
         passww = receive_from(user)
-        if passww == '12345':
+        if passww == '12345': # we have set the password here to 12345
             user.admin_only = True
             now = datetime.now()
             time = now.strftime("%H : %M : %S")
@@ -73,46 +76,45 @@ def handle_command(user, message):
             broadcast(f'--->>  {user.username} is now an admin', [user], True)
         else:
             send_to(user, '-- Invalid credentials')
+    #Non-Admin commands
     elif cmd_name == '$quit' or cmd_name == '$exit':
         send_to(user, '%QUIT%')
         user.co.close()
     elif cmd_name == '$online':
         send_to(user, f'-- Currently online users: {list(map(lambda p: p.username, users))}')
-    # admin commands
+    
+    #Admin commands below
     elif not user.admin_only:
         send_to(user, '-- Admin privileges required')
     else:
-        if cmd_name == '$kick':
+        if cmd_name == '$kick': # To kick out a user
             username_to_kick = cmd[6:]
             if kick_user(username_to_kick):
                 broadcast(f'-->> {username_to_kick} was kicked by {user.username}', None, True)
             else:
                 send_to(user, f'-- Could not kick {username_to_kick}')
-        elif cmd_name == '$ban':
+        elif cmd_name == '$ban': # To ban a user
             username_to_ban = cmd[5:]
             if kick_user(username_to_ban):
                 banned_usernames.append(username_to_ban)
                 broadcast(f'-- User {username_to_ban} kicked and banned by {user.username}', None, True)
             else:
                 send_to(user, f'-- Could not kick {username_to_ban}')
-        elif cmd_name == '$unban':
+        elif cmd_name == '$unban': # To unban a user
             username_to_unban = cmd[7:]
             try:
                 banned_usernames.remove(username_to_unban)
                 broadcast(f'-- User {username_to_unban} unbanned by {user.username}', None, True)
             except ValueError:
                 send_to(user, f'-- User {username_to_unban} was not in ban list')
-        elif cmd_name == '$banned':
+        elif cmd_name == '$banned': # shows the current list of banned users
             send_to(user, f'-- Currently banned: {banned_usernames}')
         else:
             send_to(user, '-- Invalid command')
 
-
+# A function to handle clients
 def handle(user: User):
-    """
-    Handle each new input from user;
-    this method runs in a separate thread for each user
-    """
+    
     while True:
         try:
             message = receive_from(user)
@@ -131,17 +133,16 @@ def handle(user: User):
             finally:
                 break
 
-
+# A function to receive from the client
 def receive():
-    """
-    Main loop, add new clients to the chat room
-    """
+    
     while True:
         co, address = server.accept()
         now = datetime.now()
         time = now.strftime("%H : %M : %S")
         print(f'{time} /Connected with {str(address)}')
-
+        
+        # These following are sent to the client to invoke several differnt actions
         co.send('%NICK%'.encode(encoding))
         username = co.recv(1024).decode(encoding)
         if username in banned_usernames:
@@ -169,7 +170,7 @@ def receive():
                 thread = threading.Thread(target=handle, args=(new_user,))
                 thread.start()
 
-
+# Main function
 if __name__ == '__main__':
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
